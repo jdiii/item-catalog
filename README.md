@@ -7,7 +7,7 @@ The app is a job board meant to connect large employers that practice such shady
 ## Installation
 * 1. Install VirtualBox. You can download it here [here](https://www.virtualbox.org/wiki/Downloads)
 * 2. Install Vagrant. You can download it [here](https://www.vagrantup.com/downloads)
-* 3. Clone the Udacity full-stack VM to your computer usin the command `git clone https://github.com/udacity/fullstack-nanodegree-vm`
+* 3. Clone the Udacity full-stack VM to your computer using the command `git clone https://github.com/udacity/fullstack-nanodegree-vm`
 * 3. From the newly created directory, run `cd /vagrant` followed by `git clone https://github.com/jdiii/item-catalog.git`
 * 4. Create a Google client ID and download the client_secret json file Google provides. Store it in the `/item-catalog` directory as `client_secrets.json`
 	* [There are directions for how to create a client ID here](https://developers.google.com/identity/sign-in/web/devconsole-project)
@@ -21,8 +21,6 @@ The app is a job board meant to connect large employers that practice such shady
 
 ## Security
 Login is via OAuth2 with your Google Account. A Google Account is required to create content.
-
-Cross-site request forgery attacks are prevented with a state token for endpoints that require a valid login.
 
 ## Permissions
 Anyone can view the companies and job listings for a company (/companies/) and (/companies/{{id}}/jobs). You must be logged in to create a category or post a job. You must be the creator of a company to edit or delete it, post jobs in it, or edit/delete the job postings.
