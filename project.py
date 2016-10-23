@@ -165,11 +165,11 @@ def getUserID(email):
 @app.route('/company/<int:company_id>/jobs/JSON')
 def companyMenuJSON(company_id):
     company = session.query(Company).filter_by(id = company_id).one()
-    jobs = session.query(Job).filter_by(company_id = company_id).order_by(desc(Job.Created)).all()
+    jobs = session.query(Job).filter_by(company_id = company_id).order_by(asc(Job.created)).all()
     return jsonify(jobs=[j.serialize for j in jobs])
 
 # return specific job
-@app.route('/company/<int:company_id>/menu/<int:job_id>/JSON')
+@app.route('/company/<int:company_id>/jobs/<int:job_id>/JSON')
 def jobJSON(company_id, job_id):
     job = session.query(Job).filter_by(id = job_id).one()
     return jsonify(job=job.serialize)
