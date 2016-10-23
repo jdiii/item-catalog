@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect,jsonify, url_for, flash
 app = Flask(__name__)
 
+# init SQLAlchemy
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Company, Job, User
@@ -8,7 +9,6 @@ from database_setup import Base, Company, Job, User
 #Connect to Database and create database session
 engine = create_engine('sqlite:///jobboard.db')
 Base.metadata.bind = engine
-
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
@@ -22,6 +22,8 @@ from flask import make_response
 import requests
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 
+
+# google login endpoint for retrieving credentials
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # prevent token forgery if state token sent is not valid
@@ -91,11 +93,14 @@ def gconnect():
     return 'Welcome !'
 
 
+# disconnect google user from app
 @app.route('/gdisconnect')
 def gdisconnect():
 
+    # get credentials if they already exist
     credentials_json = login_session.get('credentials')
-
+    # delete credentials if they exist
+    # ugly, but py throws exception when deleting non-extant key
     if login_session.get('credentials'):
         del login_session['credentials']
     if login_session.get('gplus_id'):
@@ -109,12 +114,15 @@ def gdisconnect():
     if login_session.get('user_id'):
         del login_session['user_id']
 
+    # if user was signed in, use credentials_json to generate a Credentials object
     if credentials_json is None:
         flash('User was not signed in')
         return redirect(url_for('showCompanies'))
     else:
         credentials = Credentials.new_from_json(credentials_json)
 
+    # try-except block because credentials.revoke
+    # does not return anything and sometimes throws exceptions...
     try:
         h = httplib2.Http()
         credentials.revoke(h)
@@ -125,19 +133,27 @@ def gdisconnect():
     flash('You have successfully logged out.')
     return redirect(url_for('showCompanies'))
 
+
 # create a new state token and return it
 # used to prevent cross-site request forgery attacks
 def state_token():
+
     state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     login_session['state'] = state
     return state
 
+
+# login endpoint
 @app.route('/login')
 def showLogin():
+
     state = state_token()
     return render_template("login.html", STATE=state)
 
+
+### user creation and lookup utility functions
 def createUser(login_session):
+
     newUser = User(
         name=login_session['username'],
         email=login_session['email'],
@@ -147,11 +163,15 @@ def createUser(login_session):
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user.id
 
+
 def getUserInfo(user_id):
+
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
+
 def getUserID(email):
+
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.id
@@ -159,25 +179,29 @@ def getUserID(email):
         return None
 
 
-# # # JSON APIs to view company Information
-
+### JSON APIs to view company Information
 # return all jobs from a company
 @app.route('/company/<int:company_id>/jobs/JSON')
 def companyMenuJSON(company_id):
-    company = session.query(Company).filter_by(id = company_id).one()
-    jobs = session.query(Job).filter_by(company_id = company_id).order_by(asc(Job.created)).all()
+
+    company = session.query(Company).filter_by(id=company_id).one()
+    jobs = session.query(Job).filter_by(company_id=company_id).order_by(asc(Job.created)).all()
     return jsonify(jobs=[j.serialize for j in jobs])
+
 
 # return specific job
 @app.route('/company/<int:company_id>/jobs/<int:job_id>/JSON')
 def jobJSON(company_id, job_id):
+
     job = session.query(Job).filter_by(id = job_id).one()
     return jsonify(job=job.serialize)
+
 
 # return all companies
 @app.route('/company/JSON')
 @app.route('/companies/JSON')
 def companiesJSON():
+
     companies = session.query(Company).all()
     return jsonify(companies=[c.serialize for c in companies])
 
@@ -187,34 +211,43 @@ def companiesJSON():
 @app.route('/company/')
 @app.route('/companies/')
 def showCompanies():
+
     companies = session.query(Company).order_by(asc(Company.name))
     if 'username' not in login_session:
         return render_template('companies.html', companies=companies)
     else:
         return render_template('companies.html', companies=companies, session=login_session)
 
+
 #Create a new company
 @app.route('/company/new/', methods=['GET','POST'])
 def newCompany():
+
     if 'username' not in login_session:
         flash('You must be logged in to create a new company.')
         return redirect('/login')
+
     if request.method == 'POST':
       newCompany = Company(name=request.form['name'], user_id=login_session['user_id'])
       session.add(newCompany)
       flash('New Company %s Successfully Created' % newCompany.name)
       session.commit()
       return redirect(url_for('showCompany', company_id=newCompany.id))
+
     else:
       return render_template('newCompany.html', session=login_session)
+
 
 #Edit a company
 @app.route('/company/<int:company_id>/edit/', methods = ['GET', 'POST'])
 def editCompany(company_id):
+
     if 'username' not in login_session:
         flash('You must be logged in to create a new company.')
         return redirect('/login')
+
     editedCompany = session.query(Company).filter_by(id=company_id).one()
+
     if 'user_id' in login_session and login_session['user_id'] == editedCompany.user_id:
         if request.method == 'POST':
             if request.form['name']:
@@ -230,6 +263,7 @@ def editCompany(company_id):
 #Delete a company
 @app.route('/company/<int:company_id>/delete/', methods = ['GET','POST'])
 def deleteCompany(company_id):
+
     if 'username' not in login_session:
         return redirect('/login')
     company = session.query(Company).filter_by(id=company_id).one()
@@ -244,10 +278,12 @@ def deleteCompany(company_id):
     else:
         return 'You must be owner of the company to delete it'
 
+
 #Show a company menu
 @app.route('/company/<int:company_id>/')
 @app.route('/company/<int:company_id>/jobs/')
 def showCompany(company_id):
+
     company = session.query(Company).filter_by(id=company_id).one()
     creator = getUserInfo(company.user_id)
     jobs = session.query(Job).filter_by(company_id=company_id).all()
@@ -259,14 +295,15 @@ def showCompany(company_id):
                                 session=login_session)
 
 
-
-
 # Create a new job posting
 @app.route('/company/<int:company_id>/jobs/new/',methods=['GET','POST'])
 def newJob(company_id):
+
     if 'username' not in login_session:
         return redirect('/login')
+
     company = session.query(Company).filter_by(id=company_id).one()
+
     if 'user_id' in login_session and login_session['user_id'] == company.user_id:
         if request.method == 'POST':
             newJob = Job(
@@ -283,14 +320,17 @@ def newJob(company_id):
     else:
         return 'you must be owner of the company to add a job'
 
+
 # Edit a job
 @app.route('/company/<int:company_id>/jobs/<int:job_id>/edit', methods=['GET','POST'])
 def editJob(company_id, job_id):
+
     if 'username' not in login_session:
         return redirect('/login')
 
     job = session.query(Job).filter_by(id = job_id).one()
     company = session.query(Company).filter_by(id = company_id).one()
+
     if 'user_id' in login_session and login_session['user_id'] == company.user_id:
         if request.method == 'POST':
             if request.form['title']:
@@ -313,10 +353,13 @@ def editJob(company_id, job_id):
 #Delete a job
 @app.route('/company/<int:company_id>/jobs/<int:job_id>/delete', methods = ['GET','POST'])
 def deleteJob(company_id,job_id):
+
     if 'username' not in login_session:
         return redirect('/login')
+
     company = session.query(Company).filter_by(id=company_id).one()
     job = session.query(Job).filter_by(id=job_id).one()
+    
     if 'user_id' in login_session and login_session['user_id'] == company.user_id:
         if request.method == 'POST':
             session.delete(job)
