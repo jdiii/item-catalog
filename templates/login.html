@@ -1,0 +1,53 @@
+{% extends 'main.html' %}
+{% block content %}
+
+
+	<div class="text-center">
+		<h2>Login with Google</h2>
+		<div id="signinButton">
+			<span class="g-signin" data-scope="openid email"
+				data-clientid="586457537866-jbj663kisi9i1aji6ao071jvneh6afvk.apps.googleusercontent.com"
+				data-redirecturi="postmessage"
+				data-accesstype="offline"
+				data-cookiepolicy="single_host_origin"
+				data-callback="signInCallback"
+				data-approvalprompt="force">
+			</span>
+		</div>
+	<div id="result"></div>
+
+
+	<script src="https://apis.google.com/js/client:platform.js?onload=start"></script>
+	<script>
+		function signInCallback(authResult){
+			result_el = $('#result');
+			if (authResult['code']){
+				$('#signinButton').css('display', 'none');
+
+				$.ajax({
+					url: '/gconnect?state={{STATE}}',
+					method: 'POST',
+					processData: false,
+					contentType: 'application/octet-stream; charset=utf-8',
+					data: authResult['code'],
+					beforeSend: function(){
+						result_el.html('Logging in...')
+					},
+					success: function(result){
+						if(result){
+							result_el.html('Login Successful! Redirecting...');
+							setTimeout(function(){
+								window.location.href='{{ url_for("showCompanies")}}';
+							}, 1000);
+						} else if (authResult['error']){
+							console.log('There was an error');
+						} else {
+							$('#result').html('Failed to get a response from the server');
+						}
+					}
+				});
+			}
+		}
+	</script>
+
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "main.html" %}
+{% block content %}
+
+	<div class="pad-top row">
+		<div class="text-center col-sm-push-1 col-md-push-2 col-sm-10 col-md-8">
+
+
+			<h1>{{ company.name }}</h1>
+
+
+			{% if session and session.user_id == creator.id %}
+			<a class="btn btn-default btn-sm" href="{{url_for('editCompany', company_id = company.id )}}">Edit Company</a>
+			<a class="btn btn-info btn-sm" href="{{url_for('newJob', company_id = company.id )}}">Post New Job</a>
+			<a class="btn btn-danger btn-sm" href="{{url_for('deleteCompany', company_id = company.id )}}">
+				<span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete Company
+			</a>
+			{% endif %}
+
+
+		</div>
+	</div>
+
+
+</div>
+
+	{% if jobs != [] %}
+		<div class="row">
+
+		{% for job in jobs %}
+
+
+			<div class="row">
+				<div class="col-md-3 col-sm-2"></div>
+				<div class="col-md-6 col-sm-8">
+					{% if loop.first %}
+						<h3 class="pad-bottom">Jobs</h3>
+					{% endif %}
+
+
+
+					<div class="job">
+
+						<h4>{{ job.title }}</h4>
+						<p>{{ job.description }}</p>
+						{% if session and session.user_id == creator.id %}
+							<p><a class="btn btn-default btn-sm" href="{{url_for('editJob', company_id = company.id, job_id = job.id )}}">Edit Job</a>
+							<a class="btn btn-danger btn-sm" href="{{url_for('deleteJob', company_id = company.id, job_id = job.id )}}">
+								<span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete Job
+							</a></p>
+						{% endif %}
+					</div>
+
+
+
+
+					{% if loop.last %}
+					<div class="text-center">
+						<div class="creator text-center">
+							<img class="creator-pic" src="{{ creator.picture }}">
+							<div>Creator: {{ creator.name }}</div>
+						</div>
+					</div>
+					{% endif %}
+
+				</div>
+				<div class="col-md-3 col-sm-2"></div>
+			</div>
+		{% endfor %}
+		</div>
+
+	{% else %}
+	<h4 class="text-center">No job postings yet!</h4>
+	{% endif %}
+{% endblock %}

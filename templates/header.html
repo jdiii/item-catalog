@@ -1,0 +1,39 @@
+
+<nav class="navbar navbar-default navbar-top">
+	<div class="text-center container-fluid">
+
+
+			<p class="navbar-brand">Defunct Company Job Board</p>
+			<p class="navbar-brand">
+				<a href="/">
+					<span class="glyphicon glyphicon-home">
+					</span>
+				</a>
+			</p>
+
+			<p class="navbar-right navbar-brand">
+					{% if not session or 'username' not in session %}
+						<a  href="{{ url_for("showLogin") }}">Login</a>
+					{% else %}
+						Welcome, {{ session.username }}. <a  href="{{ url_for("gdisconnect") }}">Logout</a>
+					{% endif %}
+			</p>
+
+		</ul>
+	</div>
+</nav>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+<div class="navbar navbar-top flash bg-info">
+	<div class="container text-center">
+
+	        <p class="text-center navbar-brand flash-message">
+	        {% for message in messages %}
+	            <strong> {{ message }} </strong>
+	        {% endfor %}
+		</p>
+	</div>
+</div>
+{% endif %}
+{% endwith %}

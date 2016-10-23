@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+{% block content %}
+
+	{% include 'form-header.html' %}
+
+	<h1 class="text-center">Post New Job</h1>
+
+			<form action="#" method = "post">
+				<div class="form-group">
+					<p>
+						<label for="title">Name:</label>
+						<input type="text" maxlength="50" class="form-control" name="title" placeholder="Job title" required>
+
+					</p>
+					<p>
+
+						<label for="description">Description:</label>
+						<textarea class="form-control" maxlength="250" rows="3" name="description" placeholder="Job description" required></textarea>
+
+					</p>
+
+					<button type="submit" class="pad-top btn btn-default btn-lg" id="submit" type="submit">
+					Create</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock %}

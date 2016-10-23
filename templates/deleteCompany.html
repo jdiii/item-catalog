@@ -1,0 +1,21 @@
+{% extends "main.html" %}
+{% block content %}
+
+{% include 'form-header.html' %}
+
+<h2> Are you sure you want to delete {{company.name}}? </h2>
+
+<form action="{{ url_for('deleteCompany', company_id=company.id) }}" method = 'post'>
+
+	<button type="submit" class="btn btn-danger delete" id="submit" type="submit">
+	<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Delete</button>
+
+	<a class="btn btn-default" href='{{url_for("showCompany", company_id=company.id)}}'>
+		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+	</a>
+
+</form>
+
+{% include 'form-footer.html' %}
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+{% block content %}
+
+
+	{% include 'form-header.html' %}
+
+			<h1>New Company</h1>
+
+			<form action="{{url_for('newCompany')}}" method="post">
+
+				<div class="form-group text-left">
+
+				<label for="name">Company Name:</label>
+
+				<input type ="text" class="form-control" maxlength="100" name="name">
+
+				</div>
+
+				<button type="submit" class="pad-top btn btn-default btn-lg" id="submit" type="submit">Create</button>
+
+			</form>
+
+		{% include 'form-footer.html' %}
+
+
+{% endblock %}

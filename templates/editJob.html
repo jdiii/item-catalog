@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+{% block content %}
+
+	{% include 'form-header.html' %}
+
+	<h1 class="text-center">Edit Job</h1>
+
+			<form class="text-left" action="{{ url_for('editJob', company_id=company.id, job_id=job.id) }}" method="post">
+				<div class="form-group">
+					<label for="name">Title:</label>
+					<input type ="text" maxlength="100" class="form-control" name="title" value="{{job.title }}">
+				</div>
+
+				<div class="form-group">
+
+					<label for="description">Description:</label>
+					<textarea class="form-control" maxlength="250" rows="3" name="description">{{job.description}}</textarea>
+
+				</div>
+				<div class="form-group text-center">
+					<button type="submit" class="btn btn-success btn-lg">Save</button>
+
+					<a href="{{ url_for('showCompany', company_id=company.id) }}" class="btn btn-default btn-lg">Cancel</a>
+
+				</div>
+			</form>
+
+		{% include 'form-footer.html' %}
+
+{% endblock %}
